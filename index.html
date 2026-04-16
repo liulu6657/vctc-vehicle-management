@@ -1,0 +1,1449 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VCTC-APR 车辆管理平台 v5.0</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+        }
+
+        body {
+            background-color: #f5f7fa;
+            color: #333;
+            line-height: 1.6;
+            padding: 20px;
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+
+        /* 顶部标题栏 */
+        .header {
+            background: linear-gradient(135deg, #1a237e 0%, #283593 100%);
+            color: white;
+            padding: 18px 30px;
+            border-radius: 12px;
+            margin-bottom: 25px;
+            box-shadow: 0 8px 20px rgba(26, 35, 126, 0.2);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo-title {
+            display: flex;
+            align-items: center;
+            gap: 18px;
+        }
+
+        .logo {
+            background: #ff4444;
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            box-shadow: 0 4px 10px rgba(255, 68, 68, 0.3);
+        }
+
+        .title h1 {
+            font-size: 26px;
+            font-weight: 700;
+            margin-bottom: 4px;
+            letter-spacing: 0.5px;
+        }
+
+        .title .version {
+            font-size: 16px;
+            opacity: 0.9;
+            font-weight: 500;
+            background: rgba(255, 255, 255, 0.15);
+            padding: 4px 12px;
+            border-radius: 20px;
+            display: inline-block;
+        }
+
+        /* 筛选器区域 */
+        .filters {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .filter-label {
+            font-size: 14px;
+            font-weight: 600;
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        .filter-select {
+            padding: 10px 16px;
+            border-radius: 8px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            background: rgba(255, 255, 255, 0.15);
+            color: white;
+            font-size: 15px;
+            font-weight: 500;
+            min-width: 160px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .filter-select:hover {
+            background: rgba(255, 255, 255, 0.25);
+            border-color: rgba(255, 255, 255, 0.5);
+        }
+
+        .filter-select option {
+            color: #333;
+            background: white;
+        }
+
+        /* 按钮工具栏 */
+        .button-toolbar {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 12px 22px;
+            border: none;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .btn-add-testing {
+            background: linear-gradient(135deg, #4caf50, #2e7d32);
+            color: white;
+        }
+
+        .btn-add-idle {
+            background: linear-gradient(135deg, #2196f3, #0d47a1);
+            color: white;
+        }
+
+        .btn-add-unusable {
+            background: linear-gradient(135deg, #ff9800, #e65100);
+            color: white;
+        }
+
+        .btn-save {
+            background: linear-gradient(135deg, #2196f3, #1565c0);
+            color: white;
+        }
+
+        .btn-reset {
+            background: linear-gradient(135deg, #f44336, #c62828);
+            color: white;
+        }
+
+        .btn-export {
+            background: linear-gradient(135deg, #9c27b0, #6a1b9a);
+            color: white;
+        }
+
+        /* 主内容区域 - V7.0优化：左侧表单，右侧地图和列表 */
+        .main-content {
+            display: flex;
+            flex-direction: row;
+            gap: 25px;
+        }
+
+        /* 左侧表单区域 */
+        .form-section {
+            flex: 0 0 350px; /* 固定宽度 */
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.08);
+        }
+
+        /* 右侧内容区域（地图和列表） */
+        .right-content {
+            flex: 1; /* 占据剩余空间 */
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+        }
+
+        /* 表单区域 */
+        .form-section {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.08);
+        }
+
+        .form-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: #1a237e;
+            margin-bottom: 20px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid #e8eaf6;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .form-label {
+            font-size: 15px;
+            font-weight: 600;
+            color: #37474f;
+        }
+
+        .form-label .required {
+            color: #f44336;
+            margin-left: 4px;
+        }
+
+        .form-input, .form-select, .form-textarea {
+            padding: 12px 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 15px;
+            transition: all 0.3s;
+            background: #fafafa;
+        }
+
+        .form-input:focus, .form-select:focus, .form-textarea:focus {
+            border-color: #2196f3;
+            background: white;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(33, 150, 243, 0.2);
+        }
+
+        .form-textarea {
+            min-height: 100px;
+            resize: vertical;
+            font-family: inherit;
+        }
+
+        .btn-create {
+            background: linear-gradient(135deg, #1a237e, #283593);
+            color: white;
+            padding: 14px 28px;
+            font-size: 16px;
+            font-weight: 700;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 10px;
+            width: 100%;
+            max-width: 300px;
+            justify-self: center;
+            box-shadow: 0 4px 12px rgba(26, 35, 126, 0.3);
+        }
+
+        .btn-create:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(26, 35, 126, 0.4);
+        }
+
+        /* 地图容器 */
+        .map-section {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.08);
+            min-height: 600px;
+        }
+
+        .map-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: #1a237e;
+            margin-bottom: 20px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid #e8eaf6;
+        }
+
+        .map-container {
+            position: relative;
+            width: 100%;
+            height: 650px; /* 增加高度以扩大地图显示面积 */
+            background: #f0f0f0;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 2px solid #e0e0e0;
+        }
+
+        .map-image {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            background: white;
+        }
+
+        /* 细杆标注样式 - 优化版 */
+        .pin-container {
+            position: absolute;
+            cursor: grab;
+            z-index: 100;
+            transform: translate(-50%, -100%);
+        }
+
+        .pin-container:active {
+            cursor: grabbing;
+        }
+
+        .pin-shaft {
+            width: 2px;
+            height: 40px; /* 杆子更长一些 */
+            margin: 0 auto;
+            position: relative;
+        }
+
+        .pin-head {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            border: 2px solid white;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+        }
+
+        /* 车辆ID标签 - V7.0优化版：白色背景缩小，整体下移，不碰到圆球 */
+        .vehicle-id-label {
+            position: absolute;
+            top: -42px; /* 下移一点点，原来-50px */
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(255, 255, 255, 0.95);
+            color: #1a237e;
+            font-size: 14px;
+            font-weight: 700;
+            padding: 4px 8px; /* 缩小背景：原来6px 10px */
+            border-radius: 4px; /* 缩小圆角：原来6px */
+            white-space: nowrap;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15); /* 缩小阴影 */
+            border: 1px solid #e0e0e0;
+            z-index: 101;
+            min-width: 50px; /* 减小最小宽度 */
+            text-align: center;
+        }
+
+        /* 状态颜色 */
+        .status-testing .pin-head {
+            background: linear-gradient(135deg, #4caf50, #2e7d32);
+        }
+        .status-testing .pin-shaft {
+            background: linear-gradient(to bottom, #4caf50, #81c784);
+        }
+
+        .status-idle .pin-head {
+            background: linear-gradient(135deg, #2196f3, #0d47a1);
+        }
+        .status-idle .pin-shaft {
+            background: linear-gradient(to bottom, #2196f3, #64b5f6);
+        }
+
+        .status-unusable .pin-head {
+            background: linear-gradient(135deg, #ff9800, #e65100);
+        }
+        .status-unusable .pin-shaft {
+            background: linear-gradient(to bottom, #ff9800, #ffb74d);
+        }
+
+        /* 标注列表区域 - 移动到地图下方 */
+        .annotations-section {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.08);
+            margin-top: 10px; /* 与地图有间距 */
+        }
+
+        .annotations-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: #1a237e;
+            margin-bottom: 20px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid #e8eaf6;
+        }
+
+        .annotations-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 20px;
+            max-height: 500px;
+            overflow-y: auto;
+            padding-right: 10px;
+        }
+
+        .annotation-card {
+            background: #fafafa;
+            border-radius: 10px;
+            padding: 18px;
+            border: 2px solid #e0e0e0;
+            transition: all 0.3s;
+        }
+
+        .annotation-card:hover {
+            border-color: #2196f3;
+            box-shadow: 0 4px 12px rgba(33, 150, 243, 0.15);
+            transform: translateY(-2px);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .vehicle-id {
+            font-size: 18px;
+            font-weight: 800;
+            color: #1a237e;
+        }
+
+        .vehicle-user {
+            font-size: 14px;
+            color: #546e7a;
+            background: #e8eaf6;
+            padding: 4px 10px;
+            border-radius: 15px;
+            font-weight: 600;
+        }
+
+        .card-details {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 700;
+            color: white;
+            text-align: center;
+            min-width: 80px;
+        }
+
+        .status-testing-badge {
+            background: linear-gradient(135deg, #4caf50, #2e7d32);
+        }
+
+        .status-idle-badge {
+            background: linear-gradient(135deg, #2196f3, #0d47a1);
+        }
+
+        .status-unusable-badge {
+            background: linear-gradient(135deg, #ff9800, #e65100);
+        }
+
+        .project-info {
+            font-size: 14px;
+            color: #37474f;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .project-info i {
+            color: #9c27b0;
+        }
+
+        .note-info {
+            font-size: 14px;
+            color: #546e7a;
+            font-style: italic;
+            background: #f5f5f5;
+            padding: 10px;
+            border-radius: 6px;
+            border-left: 4px solid #9e9e9e;
+            margin-top: 8px;
+        }
+
+        .card-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+            justify-content: flex-end;
+        }
+
+        .action-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: #5c6bc0;
+            font-size: 16px;
+            padding: 8px;
+            border-radius: 6px;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .action-btn:hover {
+            background: #e8eaf6;
+            color: #1a237e;
+            transform: scale(1.1);
+        }
+
+        /* 编辑表单 */
+        .edit-form-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .edit-form {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2);
+        }
+
+        .edit-form-title {
+            font-size: 22px;
+            font-weight: 800;
+            color: #1a237e;
+            margin-bottom: 25px;
+            text-align: center;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 15px;
+            margin-top: 25px;
+            justify-content: center;
+        }
+
+        .btn-cancel {
+            background: #e0e0e0;
+            color: #424242;
+        }
+
+        .btn-update {
+            background: linear-gradient(135deg, #1a237e, #283593);
+            color: white;
+        }
+
+        /* 通知消息 */
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: linear-gradient(135deg, #4caf50, #2e7d32);
+            color: white;
+            padding: 15px 25px;
+            border-radius: 10px;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+            z-index: 2000;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-weight: 600;
+            animation: slideIn 0.4s, fadeOut 0.5s 2.5s forwards;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        @keyframes fadeOut {
+            to { opacity: 0; }
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 1200px) {
+            .main-content {
+                flex-direction: column;
+            }
+            
+            .form-section, .map-section {
+                width: 100%;
+            }
+            
+            .filters {
+                flex-wrap: wrap;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .header {
+                flex-direction: column;
+                gap: 20px;
+                text-align: center;
+            }
+            
+            .filters {
+                flex-direction: column;
+                width: 100%;
+            }
+            
+            .filter-select {
+                width: 100%;
+            }
+            
+            .button-toolbar {
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 顶部导航栏 -->
+    <div class="header">
+        <div class="logo-title">
+            <div class="logo">
+                <i class="fas fa-car"></i>
+            </div>
+            <div class="title">
+                <h1>VCTC-APR 车辆管理平台</h1>
+                <div class="version">v7.0</div>
+            </div>
+        </div>
+        
+        <div class="filters">
+            <div class="filter-group">
+                <div class="filter-label">车辆状态筛选</div>
+                <select id="statusFilter" class="filter-select">
+                    <option value="all">全部显示</option>
+                    <option value="testing">测试中</option>
+                    <option value="idle">闲置中</option>
+                    <option value="unusable">无法使用</option>
+                </select>
+            </div>
+            
+            <div class="filter-group">
+                <div class="filter-label">车辆项目筛选</div>
+                <select id="projectFilter" class="filter-select">
+                    <option value="all">全部显示</option>
+                    <option value="CMP21D">CMP21D</option>
+                    <option value="MEB31">MEB31</option>
+                    <option value="CSP31">CSP31</option>
+                    <option value="CSP31 EREV">CSP31 EREV</option>
+                    <option value="CPM21 PHEV">CPM21 PHEV</option>
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <!-- 按钮工具栏 -->
+    <div class="button-toolbar">
+        <button class="btn btn-add-testing" id="addTestingBtn">
+            <i class="fas fa-plus-circle"></i> 添加测试中车辆
+        </button>
+        <button class="btn btn-add-idle" id="addIdleBtn">
+            <i class="fas fa-plus-circle"></i> 添加闲置中车辆
+        </button>
+        <button class="btn btn-add-unusable" id="addUnusableBtn">
+            <i class="fas fa-plus-circle"></i> 添加无法使用车辆
+        </button>
+        <button class="btn btn-save" id="saveBtn">
+            <i class="fas fa-save"></i> 保存标注
+        </button>
+        <button class="btn btn-reset" id="resetBtn">
+            <i class="fas fa-redo"></i> 重置标注
+        </button>
+        <button class="btn btn-export" id="exportBtn">
+            <i class="fas fa-file-export"></i> 导出数据
+        </button>
+    </div>
+
+    <!-- 主内容区域 -->
+    <div class="main-content">
+        <!-- 表单区域 -->
+        <div class="form-section">
+            <div class="form-title">添加新车辆标注</div>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label class="form-label">车辆ID <span class="required">*</span></label>
+                    <input type="text" id="vehicleId" class="form-input" placeholder="例如: VH-001" value="VH-009">
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">车辆用户</label>
+                    <input type="text" id="vehicleUser" class="form-input" placeholder="例如: 张三" value="张三">
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">车辆状态 <span class="required">*</span></label>
+                    <select id="vehicleStatus" class="form-select">
+                        <option value="testing" selected>测试中</option>
+                        <option value="idle">闲置中</option>
+                        <option value="unusable">无法使用</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">车辆项目 <span class="required">*</span></label>
+                    <select id="vehicleProject" class="form-select">
+                        <option value="CPM21 PHEV" selected>CPM21 PHEV</option>
+                        <option value="CMP21D">CMP21D</option>
+                        <option value="MEB31">MEB31</option>
+                        <option value="CSP31">CSP31</option>
+                        <option value="CSP31 EREV">CSP31 EREV</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">备注信息</label>
+                    <textarea id="vehicleNote" class="form-textarea" placeholder="例如: 软件集成中心 - 软件测试">软件集成中心 - 软件测试</textarea>
+                </div>
+            </div>
+            <button class="btn-create" id="createBtn">
+                <i class="fas fa-map-pin"></i> 创建新标注
+            </button>
+        </div>
+
+        <!-- 右侧内容区域（地图和标注列表） -->
+        <div class="right-content">
+            <!-- 地图区域 -->
+            <div class="map-section">
+                <div class="map-title">园区规划地图</div>
+                <div class="map-container" id="mapContainer">
+                    <!-- 地图图片会通过JavaScript加载 -->
+                </div>
+            </div>
+
+            <!-- 标注列表区域 - 在右侧内容中 -->
+            <div class="annotations-section">
+                <div class="annotations-title">当前标注列表</div>
+                <div class="annotations-grid" id="annotationsList">
+                    <!-- 标注卡片会通过JavaScript动态生成 -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 编辑表单（隐藏） -->
+    <div id="editFormOverlay" class="edit-form-overlay" style="display: none;">
+        <div class="edit-form">
+            <div class="edit-form-title">编辑车辆信息</div>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label class="form-label">车辆ID <span class="required">*</span></label>
+                    <input type="text" id="editVehicleId" class="form-input" placeholder="例如: VH-001">
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">车辆用户</label>
+                    <input type="text" id="editVehicleUser" class="form-input" placeholder="例如: 张三">
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">车辆状态 <span class="required">*</span></label>
+                    <select id="editVehicleStatus" class="form-select">
+                        <option value="testing">测试中</option>
+                        <option value="idle">闲置中</option>
+                        <option value="unusable">无法使用</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">车辆项目 <span class="required">*</span></label>
+                    <select id="editVehicleProject" class="form-select">
+                        <option value="CMP21D">CMP21D</option>
+                        <option value="MEB31">MEB31</option>
+                        <option value="CSP31">CSP31</option>
+                        <option value="CSP31 EREV">CSP31 EREV</option>
+                        <option value="CPM21 PHEV">CPM21 PHEV</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">备注信息</label>
+                    <textarea id="editVehicleNote" class="form-textarea" placeholder="例如: 软件集成中心 - 软件测试"></textarea>
+                </div>
+            </div>
+            <div class="form-actions">
+                <button class="btn btn-cancel" id="cancelEditBtn">取消</button>
+                <button class="btn btn-update" id="updateBtn">更新</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 数据存储
+        let annotations = [];
+        let currentEditId = null;
+        
+        // 初始化地图
+        function initMap() {
+            const mapContainer = document.getElementById('mapContainer');
+            
+            // 清空地图容器
+            mapContainer.innerHTML = '';
+            
+            // 创建地图图片 - 使用相对路径确保同一目录下加载
+            const mapImg = document.createElement('img');
+            mapImg.className = 'map-image';
+            mapImg.src = 'vctc_map_background.png';
+            mapImg.alt = 'VCTC园区规划地图';
+            
+            // 添加加载错误处理
+            mapImg.onerror = function() {
+                console.error('地图图片加载失败，请确保vctc_map_background.png在同一目录下');
+                this.style.display = 'none';
+                const errorMsg = document.createElement('div');
+                errorMsg.style.cssText = `
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    height: 100%;
+                    color: #f44336;
+                    font-size: 18px;
+                    font-weight: bold;
+                    text-align: center;
+                    padding: 20px;
+                `;
+                errorMsg.innerHTML = `
+                    <div>
+                        <i class="fas fa-exclamation-triangle" style="font-size: 48px; margin-bottom: 20px;"></i>
+                        <p>地图图片加载失败</p>
+                        <p style="font-size: 14px; margin-top: 10px;">请确保 vctc_map_background.png 文件与HTML文件在同一目录下</p>
+                    </div>
+                `;
+                mapContainer.appendChild(errorMsg);
+            };
+            
+            mapImg.onload = function() {
+                console.log('地图图片加载成功');
+            };
+            
+            mapContainer.appendChild(mapImg);
+            
+            // 渲染现有标注
+            renderAnnotations();
+            
+            // 添加双击添加标注功能
+            mapContainer.addEventListener('dblclick', function(e) {
+                const rect = mapContainer.getBoundingClientRect();
+                const x = ((e.clientX - rect.left) / rect.width) * 100;
+                const y = ((e.clientY - rect.top) / rect.height) * 100;
+                
+                // 获取当前表单中的用户信息作为默认值
+                const vehicleId = document.getElementById('vehicleId').value || 'VH-001';
+                const vehicleUser = document.getElementById('vehicleUser').value || '用户';
+                const vehicleStatus = document.getElementById('vehicleStatus').value;
+                const vehicleProject = document.getElementById('vehicleProject').value;
+                const vehicleNote = document.getElementById('vehicleNote').value || '双击添加的标注';
+                
+                // 生成新的车辆ID（基于现有的编号）
+                const vehicleIds = annotations.map(a => a.id);
+                let newIdNum = 1;
+                while (vehicleIds.includes(`VH-${String(newIdNum).padStart(3, '0')}`)) {
+                    newIdNum++;
+                }
+                const newVehicleId = `VH-${String(newIdNum).padStart(3, '0')}`;
+                
+                addAnnotation({
+                    id: newVehicleId,
+                    user: vehicleUser,
+                    status: vehicleStatus,
+                    project: vehicleProject,
+                    note: vehicleNote,
+                    x: x,
+                    y: y
+                });
+                
+                showNotification('成功添加车辆标注：' + newVehicleId);
+            });
+        }
+        
+        // 添加标注
+        function addAnnotation(data) {
+            const annotation = {
+                id: data.id,
+                user: data.user,
+                status: data.status,
+                project: data.project,
+                note: data.note,
+                x: data.x,
+                y: data.y,
+                timestamp: new Date().toISOString()
+            };
+            
+            annotations.push(annotation);
+            renderAnnotations();
+            return annotation;
+        }
+        
+        // 删除标注
+        function deleteAnnotation(id) {
+            annotations = annotations.filter(a => a.id !== id);
+            renderAnnotations();
+            showNotification('已删除车辆标注：' + id);
+        }
+        
+        // 更新标注
+        function updateAnnotation(id, updates) {
+            const index = annotations.findIndex(a => a.id === id);
+            if (index !== -1) {
+                annotations[index] = {
+                    ...annotations[index],
+                    ...updates,
+                    timestamp: new Date().toISOString()
+                };
+                renderAnnotations();
+                showNotification('已更新车辆标注：' + id);
+                return true;
+            }
+            return false;
+        }
+        
+        // 渲染所有标注
+        function renderAnnotations() {
+            const mapContainer = document.getElementById('mapContainer');
+            const annotationsList = document.getElementById('annotationsList');
+            
+            // 清除地图上的所有标注（除了地图图片）
+            const pins = mapContainer.querySelectorAll('.pin-container');
+            pins.forEach(pin => {
+                if (pin.parentNode === mapContainer) {
+                    mapContainer.removeChild(pin);
+                }
+            });
+            
+            // 获取筛选条件
+            const statusFilter = document.getElementById('statusFilter').value;
+            const projectFilter = document.getElementById('projectFilter').value;
+            
+            // 筛选标注
+            const filteredAnnotations = annotations.filter(annotation => {
+                if (statusFilter !== 'all' && annotation.status !== statusFilter) return false;
+                if (projectFilter !== 'all' && annotation.project !== projectFilter) return false;
+                return true;
+            });
+            
+            // 在地图上渲染标注
+            filteredAnnotations.forEach(annotation => {
+                renderPinOnMap(annotation);
+            });
+            
+            // 渲染标注列表
+            renderAnnotationsList(filteredAnnotations);
+        }
+        
+        // 在地图上渲染单个标注（细杆+车号标签）
+        function renderPinOnMap(annotation) {
+            const mapContainer = document.getElementById('mapContainer');
+            
+            // 创建标注容器
+            const pinContainer = document.createElement('div');
+            pinContainer.className = `pin-container status-${annotation.status}`;
+            pinContainer.id = `pin-${annotation.id}`;
+            pinContainer.style.left = `${annotation.x}%`;
+            pinContainer.style.top = `${annotation.y}%`;
+            pinContainer.setAttribute('data-vehicle-id', annotation.id);
+            
+            // 创建细杆
+            const pinShaft = document.createElement('div');
+            pinShaft.className = 'pin-shaft';
+            
+            // 创建圆球头部
+            const pinHead = document.createElement('div');
+            pinHead.className = 'pin-head';
+            
+            // 创建车辆ID标签 - 优化：上移不遮挡杆子，白底黑字加粗
+            const idLabel = document.createElement('div');
+            idLabel.className = 'vehicle-id-label';
+            idLabel.textContent = annotation.id;
+            
+            // 组装标注
+            pinContainer.appendChild(pinShaft);
+            pinContainer.appendChild(pinHead);
+            pinContainer.appendChild(idLabel);
+            
+            // 添加拖拽功能
+            makeDraggable(pinContainer, annotation.id);
+            
+            // 添加到地图
+            mapContainer.appendChild(pinContainer);
+        }
+        
+        // 使标注可拖拽
+        function makeDraggable(element, vehicleId) {
+            let isDragging = false;
+            let startX, startY, startLeft, startTop;
+            
+            element.addEventListener('mousedown', startDrag);
+            
+            function startDrag(e) {
+                e.preventDefault();
+                isDragging = true;
+                
+                const rect = element.getBoundingClientRect();
+                const mapRect = document.getElementById('mapContainer').getBoundingClientRect();
+                
+                startX = e.clientX;
+                startY = e.clientY;
+                startLeft = rect.left - mapRect.left;
+                startTop = rect.top - mapRect.top;
+                
+                document.addEventListener('mousemove', onDrag);
+                document.addEventListener('mouseup', stopDrag);
+                
+                element.style.cursor = 'grabbing';
+                element.style.zIndex = '1000';
+            }
+            
+            function onDrag(e) {
+                if (!isDragging) return;
+                
+                const mapRect = document.getElementById('mapContainer').getBoundingClientRect();
+                const deltaX = e.clientX - startX;
+                const deltaY = e.clientY - startY;
+                
+                let newLeft = startLeft + deltaX;
+                let newTop = startTop + deltaY;
+                
+                // 边界检查
+                newLeft = Math.max(0, Math.min(newLeft, mapRect.width - 1));
+                newTop = Math.max(0, Math.min(newTop, mapRect.height - 1));
+                
+                // 转换为百分比
+                const percentX = (newLeft / mapRect.width) * 100;
+                const percentY = (newTop / mapRect.height) * 100;
+                
+                element.style.left = percentX + '%';
+                element.style.top = percentY + '%';
+            }
+            
+            function stopDrag() {
+                if (!isDragging) return;
+                
+                isDragging = false;
+                
+                // 计算最终百分比位置
+                const mapRect = document.getElementById('mapContainer').getBoundingClientRect();
+                const elementRect = element.getBoundingClientRect();
+                
+                const percentX = ((elementRect.left - mapRect.left) / mapRect.width) * 100;
+                const percentY = ((elementRect.top - mapRect.top) / mapRect.height) * 100;
+                
+                // 更新数据存储中的位置
+                const index = annotations.findIndex(a => a.id === vehicleId);
+                if (index !== -1) {
+                    annotations[index].x = percentX;
+                    annotations[index].y = percentY;
+                    annotations[index].timestamp = new Date().toISOString();
+                }
+                
+                element.style.cursor = 'grab';
+                element.style.zIndex = '100';
+                
+                document.removeEventListener('mousemove', onDrag);
+                document.removeEventListener('mouseup', stopDrag);
+                
+                showNotification('已更新车辆位置：' + vehicleId);
+            }
+        }
+        
+        // 渲染标注列表
+        function renderAnnotationsList(annotationsToRender) {
+            const annotationsList = document.getElementById('annotationsList');
+            
+            if (annotationsToRender.length === 0) {
+                annotationsList.innerHTML = `
+                    <div style="grid-column: 1 / -1; text-align: center; padding: 40px; color: #9e9e9e;">
+                        <i class="fas fa-map-marker-alt" style="font-size: 48px; margin-bottom: 20px;"></i>
+                        <h3>暂无车辆标注</h3>
+                        <p>点击"创建新标注"按钮或双击地图添加车辆标注</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            annotationsList.innerHTML = annotationsToRender.map(annotation => `
+                <div class="annotation-card">
+                    <div class="card-header">
+                        <div class="vehicle-id">${annotation.id}</div>
+                        <div class="vehicle-user">用户：${annotation.user}</div>
+                    </div>
+                    
+                    <div class="card-details">
+                        <div>
+                            <span class="status-badge status-${annotation.status}-badge">
+                                ${getStatusText(annotation.status)}
+                            </span>
+                        </div>
+                        
+                        <div class="project-info">
+                            <i class="fas fa-project-diagram"></i>
+                            ${annotation.project}
+                        </div>
+                        
+                        <div class="note-info">
+                            <i class="fas fa-sticky-note"></i> ${annotation.note}
+                        </div>
+                    </div>
+                    
+                    <div class="card-actions">
+                        <button class="action-btn" onclick="editAnnotation('${annotation.id}')" title="编辑">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="action-btn" onclick="deleteAnnotation('${annotation.id}')" title="删除">
+                            <i class="fas fa-trash-alt"></i>
+                        </button>
+                        <button class="action-btn" onclick="locateAnnotation('${annotation.id}')" title="定位到地图">
+                            <i class="fas fa-location-arrow"></i>
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        // 获取状态文本
+        function getStatusText(status) {
+            const statusMap = {
+                'testing': '测试中',
+                'idle': '闲置中',
+                'unusable': '无法使用'
+            };
+            return statusMap[status] || status;
+        }
+        
+        // 编辑标注
+        function editAnnotation(id) {
+            const annotation = annotations.find(a => a.id === id);
+            if (!annotation) return;
+            
+            currentEditId = id;
+            
+            // 填充编辑表单
+            document.getElementById('editVehicleId').value = annotation.id;
+            document.getElementById('editVehicleUser').value = annotation.user;
+            document.getElementById('editVehicleStatus').value = annotation.status;
+            document.getElementById('editVehicleProject').value = annotation.project;
+            document.getElementById('editVehicleNote').value = annotation.note;
+            
+            // 显示编辑表单
+            document.getElementById('editFormOverlay').style.display = 'flex';
+        }
+        
+        // 定位标注（将地图滚动到标注位置）
+        function locateAnnotation(id) {
+            const pin = document.getElementById(`pin-${id}`);
+            if (!pin) return;
+            
+            pin.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });
+            
+            // 添加高亮效果
+            pin.style.boxShadow = '0 0 0 3px rgba(33, 150, 243, 0.5)';
+            setTimeout(() => {
+                pin.style.boxShadow = 'none';
+            }, 2000);
+            
+            showNotification('已定位到车辆：' + id);
+        }
+        
+        // 显示通知消息
+        function showNotification(message) {
+            // 移除现有通知
+            const existing = document.querySelector('.notification');
+            if (existing) {
+                existing.remove();
+            }
+            
+            // 创建新通知
+            const notification = document.createElement('div');
+            notification.className = 'notification';
+            notification.innerHTML = `
+                <i class="fas fa-check-circle"></i>
+                <span>${message}</span>
+            `;
+            
+            document.body.appendChild(notification);
+            
+            // 4秒后自动移除
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.remove();
+                }
+            }, 4000);
+        }
+        
+        // 保存标注数据
+        function saveAnnotations() {
+            const data = {
+                annotations: annotations,
+                savedAt: new Date().toISOString(),
+                version: '5.0'
+            };
+            
+            // 在实际应用中，这里应该发送到服务器
+            // 现在只在控制台显示
+            console.log('保存的数据:', data);
+            
+            showNotification(`已保存 ${annotations.length} 个车辆标注`);
+            
+            return data;
+        }
+        
+        // 导出数据
+        function exportData() {
+            const data = saveAnnotations();
+            const dataStr = JSON.stringify(data, null, 2);
+            const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+            
+            const exportFileDefaultName = `VCTC-APR_车辆数据_${new Date().toISOString().split('T')[0]}.json`;
+            
+            const linkElement = document.createElement('a');
+            linkElement.setAttribute('href', dataUri);
+            linkElement.setAttribute('download', exportFileDefaultName);
+            linkElement.click();
+            
+            showNotification('数据已导出为JSON文件');
+        }
+        
+        // 重置标注
+        function resetAnnotations() {
+            if (confirm('确定要重置所有标注吗？这将删除所有车辆标注。')) {
+                annotations = [];
+                renderAnnotations();
+                showNotification('已重置所有车辆标注');
+            }
+        }
+        
+        // 添加测试数据
+        function addTestData() {
+            if (annotations.length >= 8) {
+                showNotification('已达到最大标注数量（8个）');
+                return;
+            }
+            
+            const vehicles = [
+                { id: 'VH-001', user: '张三', status: 'testing', project: 'CMP21D', note: '城市测试跑道 - 性能测试', x: 25, y: 40 },
+                { id: 'VH-002', user: '李四', status: 'idle', project: 'MEB31', note: '车辆研发中心 - 待分配', x: 45, y: 35 },
+                { id: 'VH-003', user: '王五', status: 'testing', project: 'CSP31', note: '整车准备中心 - 软件测试', x: 60, y: 50 },
+                { id: 'VH-004', user: '赵六', status: 'unusable', project: 'CSP31 EREV', note: '电池测试中心 - 故障维修', x: 35, y: 65 },
+                { id: 'VH-005', user: '孙七', status: 'idle', project: 'CPM21 PHEV', note: '软件集成中心 - 已完成测试', x: 70, y: 30 }
+            ];
+            
+            // 只添加当前不存在的车辆
+            const existingIds = annotations.map(a => a.id);
+            vehicles.forEach(vehicle => {
+                if (!existingIds.includes(vehicle.id) && annotations.length < 8) {
+                    addAnnotation(vehicle);
+                }
+            });
+            
+            showNotification('已添加测试数据');
+        }
+        
+        // 事件监听器
+        document.addEventListener('DOMContentLoaded', function() {
+            // 初始化地图
+            initMap();
+            
+            // 添加测试数据按钮
+            document.getElementById('addTestingBtn').addEventListener('click', function() {
+                const vehicleIds = annotations.map(a => a.id);
+                let newIdNum = 1;
+                while (vehicleIds.includes(`VH-${String(newIdNum).padStart(3, '0')}`)) {
+                    newIdNum++;
+                }
+                const newVehicleId = `VH-${String(newIdNum).padStart(3, '0')}`;
+                
+                addAnnotation({
+                    id: newVehicleId,
+                    user: '测试用户',
+                    status: 'testing',
+                    project: 'CMP21D',
+                    note: '测试中车辆 - 双击地图添加',
+                    x: 20 + Math.random() * 60,
+                    y: 20 + Math.random() * 60
+                });
+                
+                showNotification('添加了测试中车辆：' + newVehicleId);
+            });
+            
+            document.getElementById('addIdleBtn').addEventListener('click', function() {
+                const vehicleIds = annotations.map(a => a.id);
+                let newIdNum = 1;
+                while (vehicleIds.includes(`VH-${String(newIdNum).padStart(3, '0')}`)) {
+                    newIdNum++;
+                }
+                const newVehicleId = `VH-${String(newIdNum).padStart(3, '0')}`;
+                
+                addAnnotation({
+                    id: newVehicleId,
+                    user: '闲置用户',
+                    status: 'idle',
+                    project: 'MEB31',
+                    note: '闲置中车辆 - 双击地图添加',
+                    x: 20 + Math.random() * 60,
+                    y: 20 + Math.random() * 60
+                });
+                
+                showNotification('添加了闲置中车辆：' + newVehicleId);
+            });
+            
+            document.getElementById('addUnusableBtn').addEventListener('click', function() {
+                const vehicleIds = annotations.map(a => a.id);
+                let newIdNum = 1;
+                while (vehicleIds.includes(`VH-${String(newIdNum).padStart(3, '0')}`)) {
+                    newIdNum++;
+                }
+                const newVehicleId = `VH-${String(newIdNum).padStart(3, '0')}`;
+                
+                addAnnotation({
+                    id: newVehicleId,
+                    user: '维修用户',
+                    status: 'unusable',
+                    project: 'CPM21 PHEV',
+                    note: '无法使用车辆 - 双击地图添加',
+                    x: 20 + Math.random() * 60,
+                    y: 20 + Math.random() * 60
+                });
+                
+                showNotification('添加了无法使用车辆：' + newVehicleId);
+            });
+            
+            // 创建新标注按钮
+            document.getElementById('createBtn').addEventListener('click', function() {
+                const vehicleId = document.getElementById('vehicleId').value.trim();
+                const vehicleUser = document.getElementById('vehicleUser').value.trim();
+                const vehicleStatus = document.getElementById('vehicleStatus').value;
+                const vehicleProject = document.getElementById('vehicleProject').value;
+                const vehicleNote = document.getElementById('vehicleNote').value.trim();
+                
+                if (!vehicleId) {
+                    alert('请填写车辆ID');
+                    return;
+                }
+                
+                // 检查车辆ID是否已存在
+                if (annotations.some(a => a.id === vehicleId)) {
+                    alert('车辆ID已存在，请使用其他ID');
+                    return;
+                }
+                
+                // 随机位置（在实际使用中，用户应双击地图选择位置）
+                const x = 30 + Math.random() * 40;
+                const y = 30 + Math.random() * 40;
+                
+                addAnnotation({
+                    id: vehicleId,
+                    user: vehicleUser || '用户',
+                    status: vehicleStatus,
+                    project: vehicleProject,
+                    note: vehicleNote || '无备注',
+                    x: x,
+                    y: y
+                });
+                
+                showNotification('成功创建车辆标注：' + vehicleId);
+            });
+            
+            // 保存按钮
+            document.getElementById('saveBtn').addEventListener('click', saveAnnotations);
+            
+            // 重置按钮
+            document.getElementById('resetBtn').addEventListener('click', resetAnnotations);
+            
+            // 导出按钮
+            document.getElementById('exportBtn').addEventListener('click', exportData);
+            
+            // 筛选器变化监听
+            document.getElementById('statusFilter').addEventListener('change', renderAnnotations);
+            document.getElementById('projectFilter').addEventListener('change', renderAnnotations);
+            
+            // 编辑表单事件
+            document.getElementById('cancelEditBtn').addEventListener('click', function() {
+                document.getElementById('editFormOverlay').style.display = 'none';
+                currentEditId = null;
+            });
+            
+            document.getElementById('updateBtn').addEventListener('click', function() {
+                if (!currentEditId) return;
+                
+                const vehicleId = document.getElementById('editVehicleId').value.trim();
+                const vehicleUser = document.getElementById('editVehicleUser').value.trim();
+                const vehicleStatus = document.getElementById('editVehicleStatus').value;
+                const vehicleProject = document.getElementById('editVehicleProject').value;
+                const vehicleNote = document.getElementById('editVehicleNote').value.trim();
+                
+                if (!vehicleId) {
+                    alert('请填写车辆ID');
+                    return;
+                }
+                
+                // 检查车辆ID是否已存在（排除当前编辑的车辆）
+                if (vehicleId !== currentEditId && annotations.some(a => a.id === vehicleId)) {
+                    alert('车辆ID已存在，请使用其他ID');
+                    return;
+                }
+                
+                // 更新标注
+                const updated = updateAnnotation(currentEditId, {
+                    id: vehicleId,
+                    user: vehicleUser || '用户',
+                    status: vehicleStatus,
+                    project: vehicleProject,
+                    note: vehicleNote || '无备注'
+                });
+                
+                if (updated) {
+                    document.getElementById('editFormOverlay').style.display = 'none';
+                    currentEditId = null;
+                }
+            });
+            
+            // 添加初始测试数据
+            setTimeout(addTestData, 500);
+        });
+    </script>
+</body>
+</html>

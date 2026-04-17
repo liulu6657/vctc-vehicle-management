@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VCTC-APR 车辆管理平台 v5.0</title>
+    <title>VCTC-APR 车辆管理平台 v7.0 - 云端协作版</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         * {
@@ -166,6 +166,17 @@
 
         .btn-export {
             background: linear-gradient(135deg, #9c27b0, #6a1b9a);
+            color: white;
+        }
+
+        /* 新增的云端同步按钮 */
+        .btn-cloud-sync {
+            background: linear-gradient(135deg, #673ab7, #4527a0);
+            color: white;
+        }
+
+        .btn-cloud-load {
+            background: linear-gradient(135deg, #00bcd4, #00838f);
             color: white;
         }
 
@@ -576,6 +587,124 @@
             color: white;
         }
 
+        /* 云端同步对话框样式 */
+        .cloud-dialog-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+        }
+
+        .cloud-dialog {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            width: 90%;
+            max-width: 800px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .cloud-dialog-title {
+            font-size: 24px;
+            font-weight: 800;
+            color: #1a237e;
+            margin-bottom: 20px;
+            text-align: center;
+            padding-bottom: 15px;
+            border-bottom: 3px solid #e8eaf6;
+        }
+
+        .cloud-dialog-content {
+            margin: 20px 0;
+        }
+
+        .data-display {
+            background: #f8f9fa;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            padding: 20px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            line-height: 1.8;
+            white-space: pre-wrap;
+            max-height: 300px;
+            overflow-y: auto;
+            margin-bottom: 20px;
+        }
+
+        .data-input {
+            width: 100%;
+            min-height: 200px;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            line-height: 1.6;
+            resize: vertical;
+            margin-bottom: 20px;
+        }
+
+        .data-input:focus {
+            border-color: #2196f3;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(33, 150, 243, 0.2);
+        }
+
+        .cloud-dialog-actions {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 25px;
+        }
+
+        .btn-copy {
+            background: linear-gradient(135deg, #2196f3, #1565c0);
+            color: white;
+            padding: 12px 30px;
+        }
+
+        .btn-open-fs {
+            background: linear-gradient(135deg, #ff9800, #e65100);
+            color: white;
+            padding: 12px 30px;
+        }
+
+        .btn-import {
+            background: linear-gradient(135deg, #4caf50, #2e7d32);
+            color: white;
+            padding: 12px 30px;
+        }
+
+        .btn-close {
+            background: linear-gradient(135deg, #f44336, #c62828);
+            color: white;
+            padding: 12px 30px;
+        }
+
+        .instruction-text {
+            background: #e8f5e9;
+            border-left: 4px solid #4caf50;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 8px;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .instruction-text.warning {
+            background: #fff3e0;
+            border-left-color: #ff9800;
+        }
+
         /* 通知消息 */
         .notification {
             position: fixed;
@@ -586,7 +715,7 @@
             padding: 15px 25px;
             border-radius: 10px;
             box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
-            z-index: 2000;
+            z-index: 3000;
             display: flex;
             align-items: center;
             gap: 12px;
@@ -637,25 +766,11 @@
             .button-toolbar {
                 justify-content: center;
             }
-        }
-        
-        /* 云端同步按钮样式 - 与导出按钮保持一致 */
-        .btn-sync-to-cloud {
-            background-color: #4CAF50;
-            color: white;
-        }
-        
-        .btn-sync-to-cloud:hover {
-            background-color: #388E3C;
-        }
-        
-        .btn-load-from-cloud {
-            background-color: #2196F3;
-            color: white;
-        }
-        
-        .btn-load-from-cloud:hover {
-            background-color: #1976D2;
+            
+            .cloud-dialog {
+                width: 95%;
+                padding: 20px;
+            }
         }
     </style>
 </head>
@@ -668,7 +783,7 @@
             </div>
             <div class="title">
                 <h1>VCTC-APR 车辆管理平台</h1>
-                <div class="version">v7.0</div>
+                <div class="version">v7.0 - 云端协作版</div>
             </div>
         </div>
         
@@ -697,7 +812,7 @@
         </div>
     </div>
 
-    <!-- 按钮工具栏 -->
+    <!-- 按钮工具栏 - 新增云端同步按钮 -->
     <div class="button-toolbar">
         <button class="btn btn-add-testing" id="addTestingBtn">
             <i class="fas fa-plus-circle"></i> 添加测试中车辆
@@ -714,14 +829,14 @@
         <button class="btn btn-reset" id="resetBtn">
             <i class="fas fa-redo"></i> 重置标注
         </button>
-        <button class="btn btn-export" id="exportBtn">
-            <i class="fas fa-file-export"></i> 导出数据
-        </button>
-        <button class="btn btn-sync-to-cloud" id="syncToCloudBtn">
+        <button class="btn btn-cloud-sync" id="syncToCloudBtn">
             <i class="fas fa-cloud-upload-alt"></i> 同步到云端
         </button>
-        <button class="btn btn-load-from-cloud" id="loadFromCloudBtn">
+        <button class="btn btn-cloud-load" id="loadFromCloudBtn">
             <i class="fas fa-cloud-download-alt"></i> 从云端加载
+        </button>
+        <button class="btn btn-export" id="exportBtn">
+            <i class="fas fa-file-export"></i> 导出数据
         </button>
     </div>
 
@@ -838,10 +953,21 @@
         </div>
     </div>
 
+    <!-- 云端同步对话框（隐藏） -->
+    <div id="cloudDialogOverlay" class="cloud-dialog-overlay" style="display: none;">
+        <div class="cloud-dialog" id="cloudDialog">
+            <!-- 内容通过JavaScript动态填充 -->
+        </div>
+    </div>
+
     <script>
         // 数据存储
         let annotations = [];
         let currentEditId = null;
+        let currentDialogType = null; // 'sync' 或 'load'
+        
+        // 飞书表格链接 - 已预置你的链接
+        const feishuTableLink = 'https://volkswagen.feishu.cn/base/ZfTbbsbkeacHQVslYsGc4TFcnub?table=tblwr5FS2Kv0Kt1H&view=vewHVBJsyn';
         
         // 初始化地图
         function initMap() {
@@ -1244,7 +1370,7 @@
             const data = {
                 annotations: annotations,
                 savedAt: new Date().toISOString(),
-                version: '5.0'
+                version: '7.0'
             };
             
             // 在实际应用中，这里应该发送到服务器
@@ -1280,6 +1406,227 @@
                 showNotification('已重置所有车辆标注');
             }
         }
+        
+        // ============ 云端同步功能 ============
+        
+        // 同步到云端 - 显示数据对话框
+        function syncToCloud() {
+            if (annotations.length === 0) {
+                showNotification('没有数据可以同步到云端');
+                return;
+            }
+            
+            currentDialogType = 'sync';
+            
+            // 生成无表头的Tab分隔数据
+            const dataLines = annotations.map(anno => {
+                return [
+                    anno.id,
+                    anno.user || '',
+                    anno.status,
+                    anno.project,
+                    anno.note || '',
+                    anno.x.toFixed(2),
+                    anno.y.toFixed(2),
+                    new Date(anno.timestamp).toLocaleString('zh-CN')
+                ].join('\t');
+            }).join('\n');
+            
+            // 显示对话框
+            showCloudDialog('sync', dataLines);
+        }
+        
+        // 从云端加载 - 显示输入对话框
+        function loadFromCloud() {
+            currentDialogType = 'load';
+            
+            // 显示空输入框对话框
+            showCloudDialog('load', '');
+        }
+        
+        // 显示云端对话框
+        function showCloudDialog(type, data) {
+            const dialog = document.getElementById('cloudDialog');
+            const overlay = document.getElementById('cloudDialogOverlay');
+            
+            if (type === 'sync') {
+                // 同步对话框
+                dialog.innerHTML = `
+                    <div class="cloud-dialog-title">
+                        <i class="fas fa-cloud-upload-alt"></i> 同步到云端
+                    </div>
+                    <div class="cloud-dialog-content">
+                        <div class="instruction-text">
+                            <strong>操作步骤：</strong><br>
+                            1. 复制下方数据（无表头）<br>
+                            2. 点击"打开飞书表格"按钮<br>
+                            3. 在飞书表格中粘贴数据
+                        </div>
+                        <div class="data-display" id="cloudDataDisplay">${data}</div>
+                        <div class="instruction-text warning">
+                            <strong>注意：</strong> 数据格式为Tab分隔，请确保飞书表格的列顺序匹配：
+                            车辆ID, 用户, 状态, 项目, 备注, X坐标, Y坐标, 更新时间
+                        </div>
+                    </div>
+                    <div class="cloud-dialog-actions">
+                        <button class="btn btn-copy" id="copyDataBtn">
+                            <i class="fas fa-copy"></i> 复制数据
+                        </button>
+                        <button class="btn btn-open-fs" id="openFeishuBtn">
+                            <i class="fas fa-external-link-alt"></i> 打开飞书表格
+                        </button>
+                        <button class="btn btn-close" id="closeDialogBtn">
+                            <i class="fas fa-times"></i> 关闭
+                        </button>
+                    </div>
+                `;
+            } else {
+                // 加载对话框
+                dialog.innerHTML = `
+                    <div class="cloud-dialog-title">
+                        <i class="fas fa-cloud-download-alt"></i> 从云端加载
+                    </div>
+                    <div class="cloud-dialog-content">
+                        <div class="instruction-text">
+                            <strong>操作步骤：</strong><br>
+                            1. 打开飞书表格<br>
+                            2. 复制数据行（不含表头）<br>
+                            3. 粘贴到下方输入框<br>
+                            4. 点击"导入数据"按钮
+                        </div>
+                        <textarea class="data-input" id="cloudDataInput" placeholder="请从飞书表格复制数据并粘贴到这里（不含表头）">${data}</textarea>
+                        <div class="instruction-text warning">
+                            <strong>注意：</strong> 请确保数据格式为Tab分隔，且顺序为：
+                            车辆ID, 用户, 状态, 项目, 备注, X坐标, Y坐标, 更新时间
+                        </div>
+                    </div>
+                    <div class="cloud-dialog-actions">
+                        <button class="btn btn-open-fs" id="openFeishuBtn">
+                            <i class="fas fa-external-link-alt"></i> 打开飞书表格
+                        </button>
+                        <button class="btn btn-import" id="importDataBtn">
+                            <i class="fas fa-download"></i> 导入数据
+                        </button>
+                        <button class="btn btn-close" id="closeDialogBtn">
+                            <i class="fas fa-times"></i> 关闭
+                        </button>
+                    </div>
+                `;
+            }
+            
+            // 显示对话框
+            overlay.style.display = 'flex';
+            
+            // 绑定对话框事件
+            bindCloudDialogEvents(type);
+        }
+        
+        // 绑定对话框事件
+        function bindCloudDialogEvents(type) {
+            // 延迟绑定，确保DOM已更新
+            setTimeout(() => {
+                // 复制数据按钮
+                const copyBtn = document.getElementById('copyDataBtn');
+                if (copyBtn) {
+                    copyBtn.addEventListener('click', function() {
+                        const dataDisplay = document.getElementById('cloudDataDisplay');
+                        if (dataDisplay) {
+                            const textToCopy = dataDisplay.textContent;
+                            navigator.clipboard.writeText(textToCopy).then(() => {
+                                showNotification('数据已复制到剪贴板');
+                            }).catch(err => {
+                                console.error('复制失败:', err);
+                                showNotification('复制失败，请手动选择复制');
+                            });
+                        }
+                    });
+                }
+                
+                // 打开飞书表格按钮
+                const openFsBtn = document.getElementById('openFeishuBtn');
+                if (openFsBtn) {
+                    openFsBtn.addEventListener('click', function() {
+                        window.open(feishuTableLink, '_blank');
+                        showNotification('已在新的标签页中打开飞书表格');
+                    });
+                }
+                
+                // 导入数据按钮
+                const importBtn = document.getElementById('importDataBtn');
+                if (importBtn) {
+                    importBtn.addEventListener('click', function() {
+                        const dataInput = document.getElementById('cloudDataInput');
+                        if (!dataInput || !dataInput.value.trim()) {
+                            showNotification('请输入要导入的数据');
+                            return;
+                        }
+                        
+                        const importedData = parseCloudData(dataInput.value);
+                        if (importedData.length > 0) {
+                            // 清空现有数据，导入新数据
+                            annotations = importedData;
+                            renderAnnotations();
+                            showNotification(`成功导入 ${importedData.length} 个车辆标注`);
+                            closeCloudDialog();
+                        } else {
+                            showNotification('导入失败，请检查数据格式');
+                        }
+                    });
+                }
+                
+                // 关闭对话框按钮
+                const closeBtn = document.getElementById('closeDialogBtn');
+                if (closeBtn) {
+                    closeBtn.addEventListener('click', closeCloudDialog);
+                }
+            }, 100);
+        }
+        
+        // 解析云端数据
+        function parseCloudData(dataText) {
+            const lines = dataText.trim().split('\n');
+            const importedAnnotations = [];
+            
+            for (const line of lines) {
+                const parts = line.trim().split('\t');
+                if (parts.length < 8) {
+                    console.warn('数据格式不正确，跳过:', line);
+                    continue;
+                }
+                
+                try {
+                    const annotation = {
+                        id: parts[0] || `VH-${String(importedAnnotations.length + 1).padStart(3, '0')}`,
+                        user: parts[1] || '用户',
+                        status: parts[2] || 'testing',
+                        project: parts[3] || 'CPM21 PHEV',
+                        note: parts[4] || '从云端导入',
+                        x: parseFloat(parts[5]) || 50,
+                        y: parseFloat(parts[6]) || 50,
+                        timestamp: parts[7] ? new Date(parts[7]).toISOString() : new Date().toISOString()
+                    };
+                    
+                    // 验证状态
+                    if (!['testing', 'idle', 'unusable'].includes(annotation.status)) {
+                        annotation.status = 'testing';
+                    }
+                    
+                    importedAnnotations.push(annotation);
+                } catch (error) {
+                    console.error('解析数据行失败:', error, line);
+                }
+            }
+            
+            return importedAnnotations;
+        }
+        
+        // 关闭云端对话框
+        function closeCloudDialog() {
+            document.getElementById('cloudDialogOverlay').style.display = 'none';
+            currentDialogType = null;
+        }
+        
+        // ============ 测试数据 ============
         
         // 添加测试数据
         function addTestData() {
@@ -1418,6 +1765,10 @@
             // 重置按钮
             document.getElementById('resetBtn').addEventListener('click', resetAnnotations);
             
+            // 云端同步按钮
+            document.getElementById('syncToCloudBtn').addEventListener('click', syncToCloud);
+            document.getElementById('loadFromCloudBtn').addEventListener('click', loadFromCloud);
+            
             // 导出按钮
             document.getElementById('exportBtn').addEventListener('click', exportData);
             
@@ -1466,127 +1817,15 @@
                 }
             });
             
-            // ====== 云端同步功能 ======
-            // 预置你的飞书表格链接（ZfTbbsbkeacHQVslYsGc4TFcnub）
-            const feishuTableShareLink = 'https://volkswagen.feishu.cn/base/ZfTbbsbkeacHQVslYsGc4TFcnub';
-            
-            // 同步到云端
-            document.getElementById('syncToCloudBtn').addEventListener('click', function() {
-                if (annotations.length === 0) {
-                    alert('暂无标注数据，请先添加车辆标注');
-                    return;
-                }
-                
-                // 生成无表头的数据
-                const dataRows = annotations.map(annotation => {
-                    const statusText = getStatusText(annotation.status);
-                    const timestamp = new Date(annotation.timestamp).toLocaleString();
-                    
-                    return [
-                        annotation.id,
-                        annotation.user,
-                        statusText,
-                        annotation.project,
-                        annotation.note,
-                        annotation.x.toFixed(2),
-                        annotation.y.toFixed(2),
-                        timestamp
-                    ].join('\t');  // 使用制表符分隔
-                });
-                
-                // 将所有行合并成一个字符串
-                const dataString = dataRows.join('\n');
-                
-                // 显示数据供用户复制
-                console.log('========== 请复制以下数据到飞书表格 ==========');
-                console.log(dataString);
-                console.log('============================================');
-                
-                // 显示友好的复制提示
-                const copyText = "请将控制台中的车辆数据复制到飞书表格中\n\n操作步骤：\n1. 按F12打开开发者工具\n2. 切换到Console标签\n3. 复制所有数据行\n4. 打开飞书表格粘贴\n\n数据已准备好，请复制粘贴到表格中。";
-                
-                if (confirm(copyText)) {
-                    // 自动打开飞书表格链接
-                    window.open(feishuTableShareLink, '_blank');
-                }
-                
-                showNotification('已生成云端同步数据，请打开控制台复制');
-            });
-            
-            // 从云端加载
-            document.getElementById('loadFromCloudBtn').addEventListener('click', function() {
-                const loadInstructions = "从云端加载数据步骤：\n\n1. 打开飞书表格链接\n2. 复制表格中的所有数据行（不含表头）\n3. 点击确定后将数据粘贴到输入框中\n\n注意：只复制数据内容，不要复制表头。";
-                
-                if (confirm(loadInstructions)) {
-                    const cloudData = prompt('请粘贴从飞书表格复制的数据：');
-                    
-                    if (cloudData && cloudData.trim()) {
-                        try {
-                            const rows = cloudData.trim().split('\n');
-                            const newAnnotations = [];
-                            
-                            rows.forEach((row, index) => {
-                                const columns = row.split('\t');
-                                
-                                if (columns.length >= 8) {
-                                    const [id, user, statusText, project, note, x, y, timestamp] = columns;
-                                    
-                                    // 转换状态文本为状态值
-                                    const status = statusText === '测试中' ? 'testing' : 
-                                                  statusText === '闲置中' ? 'idle' : 'unusable';
-                                    
-                                    // 检查是否已存在相同的车辆ID
-                                    const existingIndex = annotations.findIndex(a => a.id === id);
-                                    
-                                    if (existingIndex !== -1) {
-                                        // 更新现有标注
-                                        annotations[existingIndex] = {
-                                            ...annotations[existingIndex],
-                                            id: id,
-                                            user: user,
-                                            status: status,
-                                            project: project,
-                                            note: note,
-                                            x: parseFloat(x),
-                                            y: parseFloat(y),
-                                            timestamp: new Date().toISOString()
-                                        };
-                                    } else {
-                                        // 添加新标注
-                                        newAnnotations.push({
-                                            id: id,
-                                            user: user,
-                                            status: status,
-                                            project: project,
-                                            note: note,
-                                            x: parseFloat(x),
-                                            y: parseFloat(y),
-                                            timestamp: new Date().toISOString()
-                                        });
-                                    }
-                                }
-                            });
-                            
-                            // 添加新标注
-                            newAnnotations.forEach(annotation => {
-                                annotations.push(annotation);
-                            });
-                            
-                            // 重新渲染
-                            renderAnnotations();
-                            
-                            showNotification(`成功加载 ${rows.length} 条云端数据`);
-                        } catch (error) {
-                            console.error('从云端加载数据失败：', error);
-                            alert('数据格式错误，请确保复制了正确的数据格式');
-                        }
-                    }
-                }
-            });
-            // ====== 云端同步功能结束 ======
-            
             // 添加初始测试数据
             setTimeout(addTestData, 500);
+            
+            // 点击对话框外部关闭
+            document.getElementById('cloudDialogOverlay').addEventListener('click', function(e) {
+                if (e.target === this) {
+                    closeCloudDialog();
+                }
+            });
         });
     </script>
 </body>

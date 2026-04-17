@@ -638,6 +638,25 @@
                 justify-content: center;
             }
         }
+        
+        /* 云端同步按钮样式 - 与导出按钮保持一致 */
+        .btn-sync-to-cloud {
+            background-color: #4CAF50;
+            color: white;
+        }
+        
+        .btn-sync-to-cloud:hover {
+            background-color: #388E3C;
+        }
+        
+        .btn-load-from-cloud {
+            background-color: #2196F3;
+            color: white;
+        }
+        
+        .btn-load-from-cloud:hover {
+            background-color: #1976D2;
+        }
     </style>
 </head>
 <body>
@@ -697,6 +716,12 @@
         </button>
         <button class="btn btn-export" id="exportBtn">
             <i class="fas fa-file-export"></i> 导出数据
+        </button>
+        <button class="btn btn-sync-to-cloud" id="syncToCloudBtn">
+            <i class="fas fa-cloud-upload-alt"></i> 同步到云端
+        </button>
+        <button class="btn btn-load-from-cloud" id="loadFromCloudBtn">
+            <i class="fas fa-cloud-download-alt"></i> 从云端加载
         </button>
     </div>
 
@@ -1440,6 +1465,125 @@
                     currentEditId = null;
                 }
             });
+            
+            // ====== 云端同步功能 ======
+            // 预置你的飞书表格链接（ZfTbbsbkeacHQVslYsGc4TFcnub）
+            const feishuTableShareLink = 'https://volkswagen.feishu.cn/base/ZfTbbsbkeacHQVslYsGc4TFcnub';
+            
+            // 同步到云端
+            document.getElementById('syncToCloudBtn').addEventListener('click', function() {
+                if (annotations.length === 0) {
+                    alert('暂无标注数据，请先添加车辆标注');
+                    return;
+                }
+                
+                // 生成无表头的数据
+                const dataRows = annotations.map(annotation => {
+                    const statusText = getStatusText(annotation.status);
+                    const timestamp = new Date(annotation.timestamp).toLocaleString();
+                    
+                    return [
+                        annotation.id,
+                        annotation.user,
+                        statusText,
+                        annotation.project,
+                        annotation.note,
+                        annotation.x.toFixed(2),
+                        annotation.y.toFixed(2),
+                        timestamp
+                    ].join('\t');  // 使用制表符分隔
+                });
+                
+                // 将所有行合并成一个字符串
+                const dataString = dataRows.join('\n');
+                
+                // 显示数据供用户复制
+                console.log('========== 请复制以下数据到飞书表格 ==========');
+                console.log(dataString);
+                console.log('============================================');
+                
+                // 显示友好的复制提示
+                const copyText = "请将控制台中的车辆数据复制到飞书表格中\n\n操作步骤：\n1. 按F12打开开发者工具\n2. 切换到Console标签\n3. 复制所有数据行\n4. 打开飞书表格粘贴\n\n数据已准备好，请复制粘贴到表格中。";
+                
+                if (confirm(copyText)) {
+                    // 自动打开飞书表格链接
+                    window.open(feishuTableShareLink, '_blank');
+                }
+                
+                showNotification('已生成云端同步数据，请打开控制台复制');
+            });
+            
+            // 从云端加载
+            document.getElementById('loadFromCloudBtn').addEventListener('click', function() {
+                const loadInstructions = "从云端加载数据步骤：\n\n1. 打开飞书表格链接\n2. 复制表格中的所有数据行（不含表头）\n3. 点击确定后将数据粘贴到输入框中\n\n注意：只复制数据内容，不要复制表头。";
+                
+                if (confirm(loadInstructions)) {
+                    const cloudData = prompt('请粘贴从飞书表格复制的数据：');
+                    
+                    if (cloudData && cloudData.trim()) {
+                        try {
+                            const rows = cloudData.trim().split('\n');
+                            const newAnnotations = [];
+                            
+                            rows.forEach((row, index) => {
+                                const columns = row.split('\t');
+                                
+                                if (columns.length >= 8) {
+                                    const [id, user, statusText, project, note, x, y, timestamp] = columns;
+                                    
+                                    // 转换状态文本为状态值
+                                    const status = statusText === '测试中' ? 'testing' : 
+                                                  statusText === '闲置中' ? 'idle' : 'unusable';
+                                    
+                                    // 检查是否已存在相同的车辆ID
+                                    const existingIndex = annotations.findIndex(a => a.id === id);
+                                    
+                                    if (existingIndex !== -1) {
+                                        // 更新现有标注
+                                        annotations[existingIndex] = {
+                                            ...annotations[existingIndex],
+                                            id: id,
+                                            user: user,
+                                            status: status,
+                                            project: project,
+                                            note: note,
+                                            x: parseFloat(x),
+                                            y: parseFloat(y),
+                                            timestamp: new Date().toISOString()
+                                        };
+                                    } else {
+                                        // 添加新标注
+                                        newAnnotations.push({
+                                            id: id,
+                                            user: user,
+                                            status: status,
+                                            project: project,
+                                            note: note,
+                                            x: parseFloat(x),
+                                            y: parseFloat(y),
+                                            timestamp: new Date().toISOString()
+                                        });
+                                    }
+                                }
+                            });
+                            
+                            // 添加新标注
+                            newAnnotations.forEach(annotation => {
+                                annotations.push(annotation);
+                            });
+                            
+                            // 重新渲染
+                            renderAnnotations();
+                            
+                            showNotification(`成功加载 ${rows.length} 条云端数据`);
+                        } catch (error) {
+                            console.error('从云端加载数据失败：', error);
+                            alert('数据格式错误，请确保复制了正确的数据格式');
+                        }
+                    }
+                }
+            });
+            // ====== 云端同步功能结束 ======
             
             // 添加初始测试数据
             setTimeout(addTestData, 500);
